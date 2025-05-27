@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createRegistration } from "@/lib/supabase";
-import { Resend } from "resend";
 
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
@@ -27,9 +26,11 @@ interface RegistrationFormProps {
   classId: string;
   onCancel: () => void;
   onSuccess: () => void;
+  bakingClass: any;
 }
 
 export function RegistrationForm({
+  bakingClass,
   classId,
   onCancel,
   onSuccess,
@@ -52,6 +53,7 @@ export function RegistrationForm({
     try {
       const result = await createRegistration({
         classId,
+        bakingClass: bakingClass.name,
         name: values.name,
         email: values.email,
         phone: values.phone,
@@ -60,7 +62,7 @@ export function RegistrationForm({
       if (result.success) {
         toast({
           title: "신청 완료",
-          description: "클래스 신청이 완료되었습니다!",
+          description: "클래스 신청이 완료되었습니다! 바로 연락드리겠습니다.",
           variant: "default",
         });
         onSuccess();
@@ -71,40 +73,19 @@ export function RegistrationForm({
           variant: "destructive",
         });
       }
-    } catch (err) {
-      console.log("err", err);
+    } catch (error) {
       toast({
         title: "신청 실패",
         description: "예기치 않은 오류가 발생했습니다",
         variant: "destructive",
       });
     } finally {
-      const resend = new Resend("re_T3fHac6v_NBzzvTHzJ9gijdcmdpHowWmH");
-      await resend.emails.send({
-        from: "Acme <onboarding@resend.dev>",
-        to: ["shimwoan@gmail.com"],
-        subject: "hello world",
-        html: "<p>it works!</p>",
-      });
-
       setIsSubmitting(false);
     }
   }
 
   return (
     <div className="mt-6 space-y-6">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCancel}
-          className="h-8 px-2"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" /> 뒤로
-        </Button>
-        <h3 className="text-lg font-semibold">신청 양식</h3>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

@@ -13,6 +13,9 @@ export interface BakingClass {
   image: string;
   instructor: string;
   location: string;
+  members: string;
+  isFull: boolean;
+  name: string;
 }
 
 export interface Registration {
@@ -22,4 +25,5 @@ export interface Registration {
   email: string;
   phone: string;
   createdAt?: string;
+  bakingClass: string;
 }
