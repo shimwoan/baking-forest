@@ -9,7 +9,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { RegistrationForm } from "@/components/RegistrationForm";
@@ -41,18 +40,11 @@ export function ClassDetailsModal({
   const isAlmostFull = availableSpots <= 3 && availableSpots > 0;
   const isFull = availableSpots === 0;
 
-  // 난이도 한글 변환
-  const levelInKorean = {
-    Beginner: "초급",
-    Intermediate: "중급",
-    Advanced: "고급",
-  }[bakingClass.level];
-
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] sm:h-[85vh] max-w-full sm:max-w-xl sm:rounded-t-xl overflow-auto"
+        className="h-[100vh] sm:h-[84vh] max-w-full sm:max-w-xl sm:rounded-t-xl overflow-auto"
       >
         <SheetHeader className="relative pb-0">
           <div className="h-48 sm:h-64 -mx-6 -mt-6 mb-6 overflow-hidden">
@@ -66,19 +58,6 @@ export function ClassDetailsModal({
             <SheetTitle className="text-2xl font-bold">
               {bakingClass.title}
             </SheetTitle>
-            <Badge
-              variant="secondary"
-              className={cn(
-                "font-medium whitespace-nowrap",
-                bakingClass.level === "Beginner" &&
-                  "bg-emerald-100 text-emerald-800",
-                bakingClass.level === "Intermediate" &&
-                  "bg-amber-100 text-amber-800",
-                bakingClass.level === "Advanced" && "bg-rose-100 text-rose-800"
-              )}
-            >
-              {levelInKorean}
-            </Badge>
           </div>
           <SheetDescription className="text-base">
             {bakingClass.description}
@@ -166,13 +145,16 @@ export function ClassDetailsModal({
                 </p>
               </div>
 
-              <Button
-                size="lg"
-                onClick={() => setShowRegistrationForm(true)}
-                disabled={isFull}
-              >
-                {isFull ? "마감" : "신청하기"}
-              </Button>
+              <div className="w-full text-center">
+                <Button
+                  size="lg"
+                  className="min-w-[180px]"
+                  onClick={() => setShowRegistrationForm(true)}
+                  disabled={isFull}
+                >
+                  {isFull ? "마감" : "신청하기"}
+                </Button>
+              </div>
             </div>
           </div>
         ) : (

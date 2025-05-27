@@ -56,8 +56,8 @@ function App() {
             원데이 클래스 참여
           </h2>
           <p className="mt-2 text-sm text-muted-foreground max-w-2xl mx-auto">
-            "베이킹 전문 강사와 함께 맛과 품질은 물론, 함께하는 소소한 대화
-            속에서 웃음과 힐링을 나누고자 해요"
+            "맛과 품질은 물론, 함께하는 소소한 대화 속에서 웃음과 힐링을
+            나누고자 해요"
           </p>
         </div>
 
@@ -79,13 +79,14 @@ function App() {
         )}
       </main>
 
-      <footer className="border-t py-6 mt-12">
+      <div className="h-8"></div>
+      {/* <footer className="border-t py-6 mt-12">
         <div className="container px-4 sm:px-6 mx-auto">
           <p className="text-center text-sm text-muted-foreground">
             © 2025 베이킹 포레스트. All rights reserved.
           </p>
         </div>
-      </footer>
+      </footer> */}
 
       <Toaster />
     </div>

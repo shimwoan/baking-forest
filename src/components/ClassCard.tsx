@@ -28,12 +28,12 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
   // }[bakingClass.level];
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-lg">
       <div className="relative h-48 overflow-hidden">
         <img
           src={bakingClass.image}
           alt={bakingClass.title}
-          className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
+          className="object-cover w-full h-full transition-transform duration-200 hover:scale-105"
         />
         {/* 초급 중급 밷지 */}
         {/* <div className="absolute top-3 right-3">
