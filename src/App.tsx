@@ -5,7 +5,6 @@ import { BakingClassList } from "@/components/BakingClassList";
 import { Toaster } from "@/components/ui/toaster";
 // getClasses는 더 이상 사용하지 않으므로 주석 처리하거나 삭제할 수 있습니다.
 // import { getClasses } from "@/lib/supabase";
-import { mockClasses } from "@/data/mockClasses"; // 에러 발생 시 fallback으로 사용
 import { v4 as uuidv4 } from "uuid";
 // 새 API URL
 const EXTERNAL_API_URL =
@@ -67,12 +66,10 @@ function App() {
           console.warn(
             "API에서 클래스 정보를 가져왔으나 비어있습니다. 목업 데이터를 사용합니다."
           );
-          setClasses(mockClasses);
         }
       } catch (error) {
         console.error("외부 API에서 클래스 불러오기 오류:", error);
         // 에러 발생 시 데모 데이터로 대체
-        setClasses(mockClasses);
       } finally {
         setIsLoading(false);
       }
