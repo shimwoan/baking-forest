@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import {  Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -32,7 +32,6 @@ interface RegistrationFormProps {
 export function RegistrationForm({
   bakingClass,
   classId,
-  onCancel,
   onSuccess,
 }: RegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
