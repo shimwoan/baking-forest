@@ -45,6 +45,7 @@ function App() {
             return {
               id: uuidv4(), // 고유 ID (API에 _key가 있다면 사용)
               name: item.name || item.title || "제목 없음", // 클래스 이름
+              datetime:item.datetime,
               description: item.description || "설명 없음", // 설명
               image: item.image_url || "/images/placeholder.png", // 이미지 URL (없으면 기본 이미지)
               price: item.price || 0, // 가격

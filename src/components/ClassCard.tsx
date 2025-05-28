@@ -57,7 +57,7 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
 
         <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
           <Calendar className="w-4 h-4" />
-          <span>{formattedDate}</span>
+          <span>{bakingClass.datetime}</span>
         </div>
 
         <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
