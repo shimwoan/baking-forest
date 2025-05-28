@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { v4 as uuidv4 } from "uuid";
 // 새 API URL
 const EXTERNAL_API_URL =
-  "https://storage.scrapinghub.com/items/814119/1/3?count=10&meta=_key&meta=_ts&apikey=7e55289cdb1740cf988234aefef679c3&format=json";
+  "https://storage.scrapinghub.com/items/814119/1/4?count=10&meta=_key&meta=_ts&apikey=7e55289cdb1740cf988234aefef679c3&format=json";
 
 function App() {
   const [classes, setClasses] = useState<BakingClass[]>([]);
