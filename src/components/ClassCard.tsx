@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { Calendar, CircleDollarSign, Users } from "lucide-react";
 import { BakingClass } from "@/types";
 import { cn } from "@/lib/utils";
@@ -12,7 +11,6 @@ interface ClassCardProps {
 
 export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
   // 날짜 포맷
-  const formattedDate = format(new Date(bakingClass.date), "yyyy년 M월 d일");
   // 수강 가능 인원 계산
   const availableSpots = bakingClass.capacity - bakingClass.enrolled;
   const isAlmostFull = availableSpots <= 3 && availableSpots > 0;
