@@ -4,8 +4,8 @@ import type { BakingClass, Registration } from '@/types';
 // These would normally come from environment variables
 // For demo purposes, we'll use placeholder values that will be replaced
 // when connecting to actual Supabase instance
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://example.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ilzpltrjttjsoatipzmb.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsenBsdHJqdHRqc29hdGlwem1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5ODA3MDMsImV4cCI6MjA2MzU1NjcwM30.g76lcWqt9EdbfKEV4k1GOn9cphQhKl9IIpMnC33PtXA';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -42,7 +42,7 @@ export async function getClassById(id: string): Promise<BakingClass | null> {
 
 // Create a new registration
 export async function createRegistration(registration: Registration): Promise<{ success: boolean, error?: string }> {
-  const {  error } = await supabase
+  const { error } = await supabase
     .from('registrations')
     .insert([{ ...registration, createdAt: new Date().toISOString() }]);
 
