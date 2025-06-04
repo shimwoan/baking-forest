@@ -1,14 +1,23 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { BakingClass } from "@/types"; // BakingClass 타입 정의를 확인하세요.
+import { BakingClass } from "@/types";
 import { BakingClassList } from "@/components/BakingClassList";
 import { Toaster } from "@/components/ui/toaster";
-// getClasses는 더 이상 사용하지 않으므로 주석 처리하거나 삭제할 수 있습니다.
-// import { getClasses } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
-// 새 API URL
-const EXTERNAL_API_URL =
-  "https://storage.scrapinghub.com/items/814119/1/7?count=10&meta=_key&meta=_ts&apikey=7e55289cdb1740cf988234aefef679c3&format=json";
+
+// -----------------------------
+// Zyte 프로젝트 정보 (실제 값으로 바꿔주세요)
+// -----------------------------
+const PROJECT_ID = "814119"; // Zyte 대시보드 → 프로젝트 ID
+const API_KEY = "7e55289cdb1740cf988234aefef679c3"; // Zyte 대시보드 → API Key
+// -----------------------------
+
+// 1) Jobs List API: 최신 완료된 Job 1건만 가져오기 (apikey 파라미터 제거)
+const JOBS_LIST_API_URL = `https://app.zyte.com/api/jobs/list.json?project=${PROJECT_ID}&state=finished&count=1&apikey=${API_KEY}`;
+
+// 2) Storage API URL 생성: output_format=json만 붙이고, 인증은 헤더로 처리
+function makeItemsUrl(jobId: string) {
+  return `https://storage.scrapinghub.com/items/${jobId}?output_format=json&apikey=${API_KEY}`;
+}
 
 function App() {
   const [classes, setClasses] = useState<BakingClass[]>([]);
@@ -17,60 +26,97 @@ function App() {
   useEffect(() => {
     async function fetchClassesFromExternalAPI() {
       try {
-        setIsLoading(true); // 로딩 시작
-        const response = await fetch(EXTERNAL_API_URL);
-        if (!response.ok) {
-          throw new Error(`API 호출 실패: ${response.status}`);
+        setIsLoading(true);
+
+        // —————————————————————————————————————————————————————————————————
+        // 1) Jobs List API 호출 (Basic Auth)
+        // —————————————————————————————————————————————————————————————————
+        const jobsResp = await fetch(JOBS_LIST_API_URL, {
+          headers: {
+            // Zyte Basic Auth: Username = API_KEY, Password = 빈 문자열
+            Authorization: "Basic " + btoa(API_KEY + ":"),
+          },
+        });
+        if (!jobsResp.ok) {
+          throw new Error(`Jobs API 호출 실패: ${jobsResp.status}`);
         }
-        const rawData = await response.json(); // API로부터 원본 데이터 받기
 
-        // --- 중요: API 데이터 매핑 시작 ---
-        // API 응답이 배열 형태라고 가정합니다.
-        // 실제 API 데이터 구조와 BakingClass 타입에 맞춰 이 부분을 수정해야 합니다.
-        // 예시: rawData의 각 아이템을 BakingClass 형태로 변환
-        const fetchedClasses: BakingClass[] = rawData.map(
-          (item: Record<string, any>) => {
-            // BakingClass 타입의 필수 필드를 API 응답의 해당 필드로 매핑합니다.
-            // 아래는 예시이며, 실제 필드명으로 변경해야 합니다.
-            // 예를 들어, API 응답에 title, description, image_url, price_value, instructor_name, unique_id, class_date 등이 있다면:
-
-            // 슬래시(/) 여러 개를 기준으로 분리
-            const parts = item.members.split(/\/+/);
-
-            const num1 = parts[0];
-            const num2 = parts[1];
-
-            const isFull = num1 === num2;
-
-            return {
-              id: uuidv4(), // 고유 ID (API에 _key가 있다면 사용)
-              name: item.name || item.title || "제목 없음", // 클래스 이름
-              datetime: item.datetime,
-              description: item.description || "설명 없음", // 설명
-              image: item.image_url || "/images/placeholder.png", // 이미지 URL (없으면 기본 이미지)
-              price: item.price || 0, // 가격
-              instructor: item.instructor_name || "강사 미정", // 강사
-              members: item.members?.replace(/\/+/g, "/"),
-              date: item.class_date || new Date().toISOString(), // 날짜 (API에 날짜 정보가 없다면 현재 날짜)
-              isFull,
-              // ... BakingClass 타입에 필요한 다른 필드들
-            };
-          }
-        );
-        // --- API 데이터 매핑 끝 ---
-
-        if (fetchedClasses.length > 0) {
-          setClasses(fetchedClasses);
-        } else {
-          // API에서 데이터를 가져왔지만 비어있는 경우, mockClasses를 사용하거나 메시지를 표시할 수 있습니다.
-          // 여기서는 mockClasses를 사용하도록 두겠습니다. 필요에 따라 변경하세요.
-          console.warn(
-            "API에서 클래스 정보를 가져왔으나 비어있습니다. 목업 데이터를 사용합니다."
-          );
+        const jobsJson = await jobsResp.json();
+        const jobsArray = jobsJson?.jobs;
+        if (!Array.isArray(jobsArray) || jobsArray.length === 0) {
+          console.warn("해당 스케줄로 완료된 Job을 찾을 수 없습니다.");
+          setClasses([]);
+          return;
         }
+
+        const latestJob = jobsArray[0] as {
+          id: string;
+          spider: string;
+          [k: string]: any;
+        };
+        const jobId = latestJob.id;
+
+        // —————————————————————————————————————————————————————————————————
+        // 2) Storage API 호출: output_format=json으로 JSON 배열 받기 (Basic Auth)
+        // —————————————————————————————————————————————————————————————————
+        const itemsUrl = makeItemsUrl(jobId);
+        const itemsResp = await fetch(itemsUrl, {
+          headers: {
+            Authorization: "Basic " + btoa(API_KEY + ":"),
+          },
+        });
+        if (!itemsResp.ok) {
+          throw new Error(`Items API 호출 실패: ${itemsResp.status}`);
+        }
+
+        // 여기서 JSON 파싱 직전에, 혹시 문자열에 문제가 있는지 확인해 봅니다.
+        const rawText = await itemsResp.text();
+
+        let rawData: any[];
+        try {
+          // output_format=json 이 제대로 작동해서 “[ { … }, { … } ]” 형태라면
+          rawData = JSON.parse(rawText);
+        } catch (e) {
+          // 만약 JSON 파싱이 실패하면(줄 단위 JSON 혹은 에러 텍스트일 수 있음),
+          // console에 원본을 찍어 보고, JSON Lines(줄 단위 JSON) 방식으로 파싱 시도
+          console.warn("JSON 파싱 실패, rawText:", rawText);
+
+          // 예시: JSON Lines → 각 줄마다 JSON.parse
+          rawData = rawText
+            .split("\n")
+            .filter((line) => line.trim().length > 0)
+            .map((line) => JSON.parse(line));
+        }
+
+        // —————————————————————————————————————————————————————————————————
+        // 3) rawData(JSON 배열) → BakingClass 배열로 매핑
+        // —————————————————————————————————————————————————————————————————
+        const fetchedClasses: any = rawData.map((item: Record<string, any>) => {
+          const membersRaw = item.members || "";
+          const parts = membersRaw.split(/\/+/);
+          const num1 = parts[0] || "";
+          const num2 = parts[1] || "";
+          const isFull = num1 === num2 && num1 !== "";
+
+          return {
+            id: uuidv4(),
+            name: item.name || item.title || "제목 없음",
+            datetime: item.datetime || item._ts || "",
+            description: item.description || "설명 없음",
+            image: item.image_url || "/images/placeholder.png",
+            price: item.price || 0,
+            instructor: item.instructor_name || "강사 미정",
+            members: membersRaw.replace(/\/+/g, "/"),
+            date: item.class_date || new Date().toISOString(),
+            isFull,
+            // … BakingClass 타입에 필요한 추가 필드가 있다면 여기서 매핑
+          };
+        });
+
+        setClasses(fetchedClasses);
       } catch (error) {
         console.error("외부 API에서 클래스 불러오기 오류:", error);
-        // 에러 발생 시 데모 데이터로 대체
+        setClasses([]); // 에러 시 빈 배열로 처리
       } finally {
         setIsLoading(false);
       }
@@ -101,8 +147,8 @@ function App() {
             원데이 클래스 참여
           </h2>
           <p className="mt-2 text-sm text-muted-foreground max-w-2xl mx-auto">
-            "베이킹 전문 강사와 함께 맛과 품질은 물론, 함께하는 소소한 대화
-            속에서 웃음과 힐링을 나누고자 해요"
+            “베이킹 전문 강사와 함께 맛과 품질은 물론, 함께하는 소소한 대화
+            속에서 웃음과 힐링을 나누고자 해요”
           </p>
         </div>
 
