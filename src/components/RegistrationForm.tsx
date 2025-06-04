@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {  Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,6 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createRegistration } from "@/lib/supabase";
+
+import { Resend } from "resend";
+const resend = new Resend("re_123456789");
 
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
@@ -80,6 +83,14 @@ export function RegistrationForm({
       });
     } finally {
       setIsSubmitting(false);
+
+      await resend.emails.send({
+        from: "bakingForest@google.com",
+        to: "shimwoan@gmail.com",
+        replyTo: "shimwoan@gmail.com",
+        subject: "신청 완료",
+        text: "신청 완료 text",
+      });
     }
   }
 
