@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createRegistration } from "@/lib/supabase";
 
-import { Resend } from "resend";
-const resend = new Resend("re_123456789");
+import emailjs from "@emailjs/browser";
 
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
@@ -83,21 +82,36 @@ export function RegistrationForm({
       });
     } finally {
       setIsSubmitting(false);
-
-      await resend.emails.send({
-        from: "bakingForest@google.com",
-        to: "shimwoan@gmail.com",
-        replyTo: "shimwoan@gmail.com",
-        subject: "신청 완료",
-        text: "신청 완료 text",
-      });
+      emailjs
+        .sendForm(
+          "service_assdg6b",
+          "template_e0baemk",
+          formRef.current as any,
+          {
+            publicKey: "QTOKax_NCpY8EPile",
+          }
+        )
+        .then(
+          () => {
+            console.log("SUCCESS!");
+          },
+          (error) => {
+            console.log("FAILED...", error);
+          }
+        );
     }
   }
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <div className="mt-6 space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          ref={formRef}
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="form space-y-4"
+        >
           <FormField
             control={form.control}
             name="name"
