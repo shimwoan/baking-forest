@@ -20,7 +20,6 @@ import emailjs from "@emailjs/browser";
 
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
-  email: z.string().email("올바른 이메일 주소를 입력해주세요"),
   phone: z.string().min(10, "올바른 전화번호를 입력해주세요"),
 });
 
@@ -43,7 +42,6 @@ export function RegistrationForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
       phone: "",
     },
   });
@@ -56,7 +54,7 @@ export function RegistrationForm({
         classId,
         bakingClass: bakingClass.name,
         name: values.name,
-        email: values.email,
+        email: "",
         phone: values.phone,
       });
 
@@ -120,24 +118,6 @@ export function RegistrationForm({
                 <FormLabel>이름</FormLabel>
                 <FormControl>
                   <Input placeholder="홍길동" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>이메일</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="example@email.com"
-                    type="email"
-                    {...field}
-                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

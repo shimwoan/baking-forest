@@ -22,7 +22,7 @@ export function ClassCreateModal({ isOpen, onClose }: ClassCreateModalProps) {
           <div className="flex items-center justify-between mb-2">
             <SheetTitle className="text-xl font-bold">일정 생성하기</SheetTitle>
           </div>
-        </SheetHeader>
+      </SheetHeader>
 
         <CreateForm onCancel={() => {}} onSuccess={onClose} />
       </SheetContent>
