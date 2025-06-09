@@ -2,6 +2,8 @@ import { useState } from "react";
 import { BakingClass } from "@/types";
 import { ClassCard } from "@/components/ClassCard";
 import { ClassDetailsModal } from "@/components/ClassDetailsModal";
+import { Button } from "./ui/button";
+import { ClassCreateModal } from "./ClassCreateModal";
 
 interface BakingClassListProps {
   classes: BakingClass[];
@@ -22,6 +24,16 @@ export function BakingClassList({ classes }: BakingClassListProps) {
     setTimeout(() => setSelectedClass(null), 300);
   };
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleCreateClassClick = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateCloseModal = () => {
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -33,10 +45,23 @@ export function BakingClassList({ classes }: BakingClassListProps) {
           />
         ))}
       </div>
+
+      <div className="flex flex-col justify-center items-center gap-2 mt-12">
+        <p className="font-medium">원하는 품목 & 날짜가 있으신가요?</p>
+        <Button variant="outline" onClick={handleCreateClassClick}>
+          일정 생성하기
+        </Button>
+      </div>
+
       <ClassDetailsModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         bakingClass={selectedClass}
+      />
+
+      <ClassCreateModal
+        isOpen={isCreateModalOpen}
+        onClose={handleCreateCloseModal}
       />
     </div>
   );
