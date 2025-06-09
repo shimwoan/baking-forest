@@ -90,7 +90,6 @@ function App() {
         // —————————————————————————————————————————————————————————————————
         // 3) rawData(JSON 배열) → BakingClass 배열로 매핑
         // —————————————————————————————————————————————————————————————————]
-        console.log("rawData", rawData);
         const data = Array.isArray(rawData) ? rawData : [rawData];
 
         const fetchedClasses: any = data?.map((item: Record<string, any>) => {
