@@ -51,7 +51,6 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
   async function onSubmit() {
     setIsSubmitting(true);
 
-    setIsSubmitting(false);
     emailjs
       .sendForm("service_assdg6b", "template_e0baemk", formRef.current as any, {
         publicKey: "QTOKax_NCpY8EPile",
@@ -70,6 +69,7 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
           console.log("FAILED...", error);
         }
       );
+    setIsSubmitting(false);
   }
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -81,6 +81,12 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
           onSubmit={form.handleSubmit(onSubmit)}
           className="form space-y-4"
         >
+          <input
+            type="hidden"
+            name="classType"
+            value={form.getValues("classType")}
+          />
+
           <FormField
             control={form.control}
             name="classType"
