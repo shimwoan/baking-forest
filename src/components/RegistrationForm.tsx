@@ -21,6 +21,7 @@ import emailjs from "@emailjs/browser";
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
   phone: z.string().min(10, "올바른 전화번호를 입력해주세요"),
+  classType: z.string(),
 });
 
 interface RegistrationFormProps {
@@ -37,12 +38,12 @@ export function RegistrationForm({
 }: RegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       phone: "",
+      classType: "",
     },
   });
 
@@ -110,6 +111,7 @@ export function RegistrationForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="form space-y-4"
         >
+          <input type="hidden" name="classType" value={bakingClass.name} />
           <FormField
             control={form.control}
             name="name"
