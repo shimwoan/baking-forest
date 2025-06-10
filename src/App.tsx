@@ -4,6 +4,7 @@ import { BakingClassList } from "@/components/BakingClassList";
 import { Toaster } from "@/components/ui/toaster";
 import { v4 as uuidv4 } from "uuid";
 import useScrollSpy from "react-use-scrollspy";
+import { cn } from "./lib/utils";
 
 // --------------------------import ScrollSpy from "react-ui-scrollspy";---
 // Zyte 프로젝트 정보 (실제 값으로 바꿔주세요)
@@ -128,7 +129,7 @@ function App() {
   const sectionRefs = [useRef(null), useRef(null), useRef(null)];
   const activeSection = useScrollSpy({
     sectionElementRefs: sectionRefs,
-    offsetPx: -120,
+    offsetPx: -250,
   });
 
   return (
@@ -139,20 +140,38 @@ function App() {
             <div className="flex justify-end items-center gap-1 w-full">
               <div className="flex gap-6 font-medium">
                 <span
-                  className={
+                  onClick={() => {
+                    {
+                      (sectionRefs[0].current as any)?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }
+                  }}
+                  className={cn(
+                    "cursor-pointer",
                     activeSection === 0
                       ? "font-semibold underline text-[#FF8855]"
                       : ""
-                  }
+                  )}
                 >
                   소개
                 </span>
                 <span
-                  className={
+                  onClick={() => {
+                    {
+                      (sectionRefs[1].current as any)?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }
+                  }}
+                  className={cn(
+                    "cursor-pointer",
                     activeSection === 1
                       ? "font-semibold underline text-[#FF8855]"
                       : ""
-                  }
+                  )}
                 >
                   참여하기
                 </span>
@@ -166,10 +185,9 @@ function App() {
         <div className="w-full h-auto tablet-x:h-[195px] overflow-hidden rounded-xl">
           <img src="/images/bg.png" alt="" />
         </div>
-        <section ref={sectionRefs[0]}>
+        <section ref={sectionRefs[0]} className="pt-8">
           <pre className="whitespace-break-spaces">
-            {`
-청주 베이킹 원데이 클래스 & 취미 공유 
+            {`청주 베이킹 원데이 클래스 & 취미 공유
 
 "베이킹 전문 강사를 초청해 맛과 품질은 물론, 함께하는 소소한 대화 속에서 웃음과 힐링을 나누고자 해요"
 
@@ -188,13 +206,11 @@ function App() {
 
 📌 주의사항
 레시피와 자료는 개인 학습용으로만 사용 가능하며, 무단 복제, 공유, 상업적 이용, 타 클래스 사용은 금지됩니다.
-
-
           `}
           </pre>
         </section>
 
-        <section ref={sectionRefs[1]}>
+        <section ref={sectionRefs[1]} className="pt-8">
           <div className="mb-5 text-center">
             <h2 className="text-xl font-bold tracking-tight">
               원데이 클래스 참여
