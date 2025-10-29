@@ -4,8 +4,8 @@ import type { BakingClass, Registration } from '@/types';
 // These would normally come from environment variables
 // For demo purposes, we'll use placeholder values that will be replaced
 // when connecting to actual Supabase instance
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ilzpltrjttjsoatipzmb.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsenBsdHJqdHRqc29hdGlwem1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5ODA3MDMsImV4cCI6MjA2MzU1NjcwM30.g76lcWqt9EdbfKEV4k1GOn9cphQhKl9IIpMnC33PtXA';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://jvmopdlgnpzfajiqyfbl.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2bW9wZGxnbnB6ZmFqaXF5ZmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NDIxOTksImV4cCI6MjA3NzMxODE5OX0.IyGbndgYr2RqV4WzrCs_NFMR8EfIYU3oL07CiraprmI';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
