@@ -7,9 +7,10 @@ import { ClassCreateModal } from "./ClassCreateModal";
 
 interface BakingClassListProps {
   classes: BakingClass[];
+  onApply: (classId: string) => void;
 }
 
-export function BakingClassList({ classes }: BakingClassListProps) {
+export function BakingClassList({ classes, onApply }: BakingClassListProps) {
   const [selectedClass, setSelectedClass] = useState<BakingClass | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -33,6 +34,7 @@ export function BakingClassList({ classes }: BakingClassListProps) {
   const handleCreateCloseModal = () => {
     setIsCreateModalOpen(false);
   };
+  console.log("classes", classes);
 
   return (
     <div>
@@ -57,6 +59,7 @@ export function BakingClassList({ classes }: BakingClassListProps) {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         bakingClass={selectedClass}
+        onApply={onApply}
       />
 
       <ClassCreateModal

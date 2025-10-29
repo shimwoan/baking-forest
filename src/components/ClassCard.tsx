@@ -23,7 +23,10 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
   //   Advanced: "고급",
   // }[bakingClass.level];
   return (
-    <Card className="flex overflow-hidden transition-all duration-300">
+    <Card
+      className="flex overflow-hidden transition-all duration-300 cursor-pointer"
+      onClick={onClick}
+    >
       <div className="flex-none relative w-[112px] h-40 overflow-hidden">
         <img
           src={bakingClass.image}
@@ -81,12 +84,15 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
             </span>
           </div>
           <Button
-            onClick={onClick}
-            disabled={isFull}
-            variant={isFull ? "outline" : "default"}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+            disabled={isFull || bakingClass.isApplied}
+            variant={isFull || bakingClass.isApplied ? "outline" : "default"}
             size="sm"
           >
-            {isFull ? "마감" : "신청 하기"}
+            {isFull ? "마감" : bakingClass.isApplied ? "신청 완료" : "신청 하기"}
           </Button>
         </CardFooter>
       </CardContent>

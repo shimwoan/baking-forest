@@ -25,6 +25,45 @@ function App() {
   const [classes, setClasses] = useState<BakingClass[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleApply = (classId: string) => {
+    setClasses((prevClasses) =>
+      prevClasses.map((cls) => {
+        if (cls.id === classId && !cls.isFull && !cls.isApplied) {
+          // members를 "1/6" 형태에서 파싱
+          const parts = cls.members.split("/");
+          const currentMembers = parseInt(parts[0] || "0", 10);
+          const capacity = parseInt(parts[1] || "0", 10);
+
+          // 참여 인원 증가
+          const newMembers = currentMembers + 1;
+          const newMembersString = `${newMembers}/${capacity}`;
+          const isFull = newMembers >= capacity;
+
+          // localStorage에 저장 (name + datetime을 키로 사용)
+          const classKey = `${cls.name}_${cls.datetime}`;
+          const appliedClasses = JSON.parse(
+            localStorage.getItem("appliedClasses") || "[]"
+          );
+          if (!appliedClasses.includes(classKey)) {
+            appliedClasses.push(classKey);
+            localStorage.setItem(
+              "appliedClasses",
+              JSON.stringify(appliedClasses)
+            );
+          }
+
+          return {
+            ...cls,
+            members: newMembersString,
+            isFull,
+            isApplied: true,
+          };
+        }
+        return cls;
+      })
+    );
+  };
+
   useEffect(() => {
     async function fetchClassesFromExternalAPI() {
       try {
@@ -93,24 +132,46 @@ function App() {
         // —————————————————————————————————————————————————————————————————]
         const data = Array.isArray(rawData) ? rawData : [rawData];
 
+        // localStorage에서 신청 완료된 클래스 키 가져오기
+        const appliedClasses = JSON.parse(
+          localStorage.getItem("appliedClasses") || "[]"
+        );
+
         const fetchedClasses: any = data?.map((item: Record<string, any>) => {
           const membersRaw = item.members || "";
           const parts = membersRaw.split(/\/+/);
           const num1 = parts[0] || "";
           const num2 = parts[1] || "";
-          const isFull = num1 === num2 && num1 !== "";
+          const name = item.name || item.title || "제목 없음";
+          const datetime = item.datetime || item._ts || "";
+          const classKey = `${name}_${datetime}`;
+          const isApplied = appliedClasses.includes(classKey);
+
+          // 신청 완료된 클래스는 참여인원 +1
+          let displayMembers = membersRaw.replace(/\/+/g, "/");
+          if (isApplied && num1 && num2) {
+            const currentMembers = parseInt(num1, 10);
+            const capacity = parseInt(num2, 10);
+            const newMembers = currentMembers + 1;
+            displayMembers = `${newMembers}/${capacity}`;
+          }
+
+          const isFull = isApplied
+            ? displayMembers.split("/")[0] === displayMembers.split("/")[1]
+            : num1 === num2 && num1 !== "";
 
           return {
             id: uuidv4(),
-            name: item.name || item.title || "제목 없음",
-            datetime: item.datetime || item._ts || "",
+            name,
+            datetime,
             description: item.description || "설명 없음",
             image: item.image_url || "/images/placeholder.png",
             price: item.price || 0,
             instructor: item.instructor_name || "강사 미정",
-            members: membersRaw.replace(/\/+/g, "/"),
+            members: displayMembers,
             date: item.class_date || new Date().toISOString(),
             isFull,
+            isApplied,
             // … BakingClass 타입에 필요한 추가 필드가 있다면 여기서 매핑
           };
         });
@@ -183,7 +244,7 @@ function App() {
 
       <main className="container px-4 sm:px-6 pb-5 mx-auto">
         <div className="w-full h-auto tablet-x:h-[195px] overflow-hidden rounded-xl">
-          <img src="/images/bg.png" alt="" />
+          <img src="/images/bg.png" className="w-full" alt="" />
         </div>
         <section ref={sectionRefs[0]} className="pt-8">
           <pre className="whitespace-break-spaces">
@@ -225,7 +286,7 @@ function App() {
               </div>
             </div>
           ) : classes.length > 0 ? (
-            <BakingClassList classes={classes} />
+            <BakingClassList classes={classes} onApply={handleApply} />
           ) : (
             <div className="flex justify-center items-center py-16">
               <p className="text-muted-foreground">

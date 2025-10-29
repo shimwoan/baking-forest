@@ -13,12 +13,14 @@ interface ClassDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   bakingClass: BakingClass | null;
+  onApply?: (classId: string) => void;
 }
 
 export function ClassDetailsModal({
   isOpen,
   onClose,
   bakingClass,
+  onApply,
 }: ClassDetailsModalProps) {
   if (!bakingClass) return null;
 
@@ -66,9 +68,14 @@ export function ClassDetailsModal({
 
         <RegistrationForm
           bakingClass={bakingClass}
-          classId={"4a39d1be-3cf4-4a13-b3d4-8a64ce3f9272"}
+          classId={bakingClass.id}
           onCancel={() => {}}
-          onSuccess={onClose}
+          onSuccess={() => {
+            if (onApply) {
+              onApply(bakingClass.id);
+            }
+            onClose();
+          }}
         />
       </SheetContent>
     </Sheet>

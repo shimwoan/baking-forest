@@ -17,6 +17,7 @@ export interface BakingClass {
   isFull: boolean;
   name: string;
   datetime: string;
+  isApplied?: boolean;
 }
 
 export interface Registration {
