@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { v4 as uuidv4 } from "uuid";
 import useScrollSpy from "react-use-scrollspy";
 import { cn } from "./lib/utils";
+import { KakaoFloatingButton } from "@/components/KakaoFloatingButton";
 
 // --------------------------import ScrollSpy from "react-ui-scrollspy";---
 // Zyte 프로젝트 정보 (실제 값으로 바꿔주세요)
@@ -308,6 +309,7 @@ function App() {
       </footer>
 
       <Toaster />
+      <KakaoFloatingButton />
     </div>
   );
 }

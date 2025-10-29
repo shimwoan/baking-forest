@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +27,9 @@ import {
 const formSchema = z.object({
   name: z.string().min(2, "이름은 2자 이상이어야 합니다"),
   classType: z.string().min(1, "품목을 선택해 주세요."),
-  phone: z.string().min(10, "올바른 전화번호를 입력해주세요"),
+  phone1: z.string(),
+  phone2: z.string(),
+  phone3: z.string(),
 });
 
 interface CreateFormProps {
@@ -38,15 +40,25 @@ interface CreateFormProps {
 export function CreateForm({ onSuccess }: CreateFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      phone: "",
+      phone1: "010",
+      phone2: "",
+      phone3: "",
       classType: "",
     },
   });
+
+  useEffect(() => {
+    // 모달이 열리면 이름 input에 focus
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, []);
 
   async function onSubmit() {
     setIsSubmitting(true);
@@ -85,6 +97,11 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
             type="hidden"
             name="classType"
             value={form.getValues("classType")}
+          />
+          <input
+            type="hidden"
+            name="phone"
+            value={`${form.watch("phone1")}${form.watch("phone2")}${form.watch("phone3")}`}
           />
 
           <FormField
@@ -159,26 +176,79 @@ export function CreateForm({ onSuccess }: CreateFormProps) {
               <FormItem>
                 <FormLabel>이름</FormLabel>
                 <FormControl>
-                  <Input placeholder="홍길동" {...field} />
+                  <Input {...field} ref={nameInputRef} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>전화번호</FormLabel>
-                <FormControl>
-                  <Input placeholder="010-1234-5678" type="tel" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="space-y-2">
+            <FormLabel>전화번호</FormLabel>
+            <div className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="phone1"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        placeholder="010"
+                        type="tel"
+                        maxLength={3}
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          field.onChange(value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone2"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        maxLength={4}
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          field.onChange(value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone3"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        maxLength={4}
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '');
+                          field.onChange(value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
           <div className="pt-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
