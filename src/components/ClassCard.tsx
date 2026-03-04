@@ -68,7 +68,7 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
 
         <div className="flex items-center gap-2 mt-1.5 text-sm text-gray-800">
           <CircleDollarSign className="flex-none w-4 h-4" />
-          <span>{bakingClass.price}</span>
+          <span>{bakingClass.priceLabel || bakingClass.price}</span>
         </div>
 
         <CardFooter className="flex items-center justify-between w-full p-0 pt-2 mt-auto">

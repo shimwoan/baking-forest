@@ -7,44 +7,33 @@ import useScrollSpy from "react-use-scrollspy";
 import { cn } from "./lib/utils";
 import { KakaoFloatingButton } from "@/components/KakaoFloatingButton";
 
-// --------------------------import ScrollSpy from "react-ui-scrollspy";---
-// Zyte 프로젝트 정보 (실제 값으로 바꿔주세요)
-// -----------------------------
-const PROJECT_ID = "814119"; // Zyte 대시보드 → 프로젝트 ID
-const API_KEY = "7e55289cdb1740cf988234aefef679c3"; // Zyte 대시보드 → API Key
-// -----------------------------
-
-// 1) Jobs List API: 최신 완료된 Job 1건만 가져오기 (apikey 파라미터 제거)
-const JOBS_LIST_API_URL = `https://app.zyte.com/api/jobs/list.json?project=${PROJECT_ID}&state=finished&count=1&apikey=${API_KEY}`;
-
-// 2) Storage API URL 생성: output_format=json만 붙이고, 인증은 헤더로 처리
-function makeItemsUrl(jobId: string) {
-  return `https://storage.scrapinghub.com/items/${jobId}?output_format=json&apikey=${API_KEY}`;
+function getAppliedClasses(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem("appliedClasses") || "[]");
+  } catch {
+    return [];
+  }
 }
 
 function App() {
   const [classes, setClasses] = useState<BakingClass[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleApply = (classId: string) => {
     setClasses((prevClasses) =>
       prevClasses.map((cls) => {
         if (cls.id === classId && !cls.isFull && !cls.isApplied) {
-          // members를 "1/6" 형태에서 파싱
           const parts = cls.members.split("/");
           const currentMembers = parseInt(parts[0] || "0", 10);
           const capacity = parseInt(parts[1] || "0", 10);
 
-          // 참여 인원 증가
-          const newMembers = currentMembers + 1;
+          const newMembers = Math.min(currentMembers + 1, capacity);
           const newMembersString = `${newMembers}/${capacity}`;
           const isFull = newMembers >= capacity;
 
-          // localStorage에 저장 (name + datetime을 키로 사용)
           const classKey = `${cls.name}_${cls.datetime}`;
-          const appliedClasses = JSON.parse(
-            localStorage.getItem("appliedClasses") || "[]"
-          );
+          const appliedClasses = getAppliedClasses();
           if (!appliedClasses.includes(classKey)) {
             appliedClasses.push(classKey);
             localStorage.setItem(
@@ -66,129 +55,77 @@ function App() {
   };
 
   useEffect(() => {
-    async function fetchClassesFromExternalAPI() {
+    async function fetchClasses() {
       try {
         setIsLoading(true);
+        setError(null);
 
-        // —————————————————————————————————————————————————————————————————
-        // 1) Jobs List API 호출 (Basic Auth)
-        // —————————————————————————————————————————————————————————————————
-        const jobsResp = await fetch(JOBS_LIST_API_URL, {
-          headers: {
-            // Zyte Basic Auth: Username = API_KEY, Password = 빈 문자열
-            Authorization: "Basic " + btoa(API_KEY + ":"),
-          },
-        });
-        if (!jobsResp.ok) {
-          throw new Error(`Jobs API 호출 실패: ${jobsResp.status}`);
-        }
-        const jobsJson = await jobsResp.json();
-        const jobsArray = jobsJson?.jobs;
-        if (!Array.isArray(jobsArray) || jobsArray.length === 0) {
-          console.warn("해당 스케줄로 완료된 Job을 찾을 수 없습니다.");
-          setClasses([]);
-          return;
+        const resp = await fetch("/api/crawl");
+        if (!resp.ok) {
+          throw new Error("API error: " + resp.status);
         }
 
-        const latestJob = jobsArray[0] as {
-          id: string;
-          spider: string;
-          [k: string]: any;
-        };
-        const jobId = latestJob.id;
-
-        // —————————————————————————————————————————————————————————————————
-        // 2) Storage API 호출: output_format=json으로 JSON 배열 받기 (Basic Auth)
-        // —————————————————————————————————————————————————————————————————
-        const itemsUrl = makeItemsUrl(jobId);
-        const itemsResp = await fetch(itemsUrl, {
-          headers: {
-            Authorization: "Basic " + btoa(API_KEY + ":"),
-          },
-        });
-        if (!itemsResp.ok) {
-          throw new Error(`Items API 호출 실패: ${itemsResp.status}`);
+        const data = await resp.json();
+        if (!Array.isArray(data)) {
+          throw new Error("Unexpected API response format");
         }
 
-        // 여기서 JSON 파싱 직전에, 혹시 문자열에 문제가 있는지 확인해 봅니다.
-        const rawText = await itemsResp.text();
-        let rawData: any[];
-        try {
-          // output_format=json 이 제대로 작동해서 “[ { … }, { … } ]” 형태라면
-          rawData = JSON.parse(rawText);
-        } catch (e) {
-          // 만약 JSON 파싱이 실패하면(줄 단위 JSON 혹은 에러 텍스트일 수 있음),
-          // console에 원본을 찍어 보고, JSON Lines(줄 단위 JSON) 방식으로 파싱 시도
-          console.warn("JSON 파싱 실패, rawText:", rawText);
+        const appliedClasses = getAppliedClasses();
 
-          // 예시: JSON Lines → 각 줄마다 JSON.parse
-          rawData = rawText
-            .split("\n")
-            .filter((line) => line.trim().length > 0)
-            .map((line) => JSON.parse(line));
-        }
-
-        // —————————————————————————————————————————————————————————————————
-        // 3) rawData(JSON 배열) → BakingClass 배열로 매핑
-        // —————————————————————————————————————————————————————————————————]
-        const data = Array.isArray(rawData) ? rawData : [rawData];
-
-        // localStorage에서 신청 완료된 클래스 키 가져오기
-        const appliedClasses = JSON.parse(
-          localStorage.getItem("appliedClasses") || "[]"
-        );
-
-        const fetchedClasses: any = data?.map((item: Record<string, any>) => {
-          const membersRaw = item.members || "";
-          const parts = membersRaw.split(/\/+/);
-          const num1 = parts[0] || "";
-          const num2 = parts[1] || "";
-          const name = item.name || item.title || "제목 없음";
-          const datetime = item.datetime || item._ts || "";
+        const fetchedClasses: BakingClass[] = data.map((item) => {
+          const name = item.name || "제목 없음";
+          const datetime = item.datetime || "";
           const classKey = `${name}_${datetime}`;
           const isApplied = appliedClasses.includes(classKey);
 
-          // 신청 완료된 클래스는 참여인원 +1
-          let displayMembers = membersRaw.replace(/\/+/g, "/");
-          if (isApplied && num1 && num2) {
-            const currentMembers = parseInt(num1, 10);
-            const capacity = parseInt(num2, 10);
-            const newMembers = currentMembers + 1;
-            displayMembers = `${newMembers}/${capacity}`;
-          }
+          const parts = (item.members || "0/0").split("/");
+          const currentMembers = parseInt(parts[0] || "0", 10);
+          const capacity = parseInt(parts[1] || "0", 10);
 
-          const isFull = isApplied
-            ? displayMembers.split("/")[0] === displayMembers.split("/")[1]
-            : num1 === num2 && num1 !== "";
+          const displayEnrolled = isApplied
+            ? Math.min(currentMembers + 1, capacity)
+            : currentMembers;
+          const displayMembers = `${displayEnrolled}/${capacity}`;
+          const isFull = capacity > 0 && displayEnrolled >= capacity;
 
           return {
             id: uuidv4(),
             name,
+            title: item.title || name,
             datetime,
-            description: item.description || "설명 없음",
-            image: item.image_url || "/images/placeholder.png",
+            date: item.date || "",
+            time: item.time || "",
+            duration: item.duration || "",
+            description: item.description || "",
+            image: item.image || "/images/placeholder.png",
             price: item.price || 0,
-            instructor: item.instructor_name || "강사 미정",
+            priceLabel: item.priceLabel || "",
+            instructor: item.instructor || "강사 미정",
+            location: item.location || "",
             members: displayMembers,
-            date: item.class_date || new Date().toISOString(),
+            capacity,
+            enrolled: displayEnrolled,
+            level: item.level || "Beginner",
+            items: item.items || [],
             isFull,
             isApplied,
-            // … BakingClass 타입에 필요한 추가 필드가 있다면 여기서 매핑
           };
         });
+
         setClasses(fetchedClasses);
-      } catch (error) {
-        console.error("외부 API에서 클래스 불러오기 오류:", error);
-        setClasses([]); // 에러 시 빈 배열로 처리
+      } catch (err) {
+        console.error("클래스 불러오기 오류:", err);
+        setError("클래스를 불러오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        setClasses([]);
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchClassesFromExternalAPI();
+    fetchClasses();
   }, []);
 
-  const sectionRefs = [useRef(null), useRef(null), useRef(null)];
+  const sectionRefs = [useRef(null), useRef(null)];
   const activeSection = useScrollSpy({
     sectionElementRefs: sectionRefs,
     offsetPx: -250,
@@ -202,14 +139,12 @@ function App() {
             <div className="flex justify-end items-center gap-1 w-full">
               <div className="flex gap-6 font-medium">
                 <span
-                  onClick={() => {
-                    {
-                      (sectionRefs[0].current as any)?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
-                    }
-                  }}
+                  onClick={() =>
+                    (sectionRefs[0].current as any)?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
+                  }
                   className={cn(
                     "cursor-pointer",
                     activeSection === 0
@@ -220,14 +155,12 @@ function App() {
                   소개
                 </span>
                 <span
-                  onClick={() => {
-                    {
-                      (sectionRefs[1].current as any)?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start",
-                      });
-                    }
-                  }}
+                  onClick={() =>
+                    (sectionRefs[1].current as any)?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
+                  }
                   className={cn(
                     "cursor-pointer",
                     activeSection === 1
@@ -285,6 +218,10 @@ function App() {
                 <div className="h-10 w-10 bg-muted rounded-full" />
                 <p className="text-muted-foreground">클래스 불러오는 중...</p>
               </div>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center py-16">
+              <p className="text-destructive">{error}</p>
             </div>
           ) : classes.length > 0 ? (
             <BakingClassList classes={classes} onApply={handleApply} />

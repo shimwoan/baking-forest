@@ -6,6 +6,7 @@ export interface BakingClass {
   time: string;
   duration: string;
   price: number;
+  priceLabel: string;
   capacity: number;
   enrolled: number;
   level: 'Beginner' | 'Intermediate' | 'Advanced';
