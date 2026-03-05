@@ -35,7 +35,6 @@ interface RegistrationFormProps {
 
 export function RegistrationForm({
   bakingClass,
-  classId,
   onSuccess,
 }: RegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
