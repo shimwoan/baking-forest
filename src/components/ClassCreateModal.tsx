@@ -16,7 +16,7 @@ export function ClassCreateModal({ isOpen, onClose }: ClassCreateModalProps) {
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] sm:h-[85vh] max-w-full sm:max-w-xl sm:rounded-t-xl overflow-auto"
+        className="h-[90vh] sm:h-[96vh] max-w-full sm:max-w-xl sm:rounded-t-xl overflow-auto"
       >
         <SheetHeader className="relative pb-0">
           <div className="flex items-center justify-between mb-2">
