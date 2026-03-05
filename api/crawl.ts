@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const SOMOIM_URL =
-  "https://www.somoim.co.kr/824ddd9e-2416-11f0-a72c-0a4f2cbd4b631";
+const SOMOIM_GROUP_ID = "824ddd9e-2416-11f0-a72c-0a4f2cbd4b631";
+const SOMOIM_URL = `https://www.somoim.co.kr/${SOMOIM_GROUP_ID}`;
+const SOMOIM_CDN = "https://d228e474i2d5yf.cloudfront.net";
 
 interface EventData {
   name: string;
@@ -229,7 +230,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         date: `${dateStr}`,
         time: timeStr,
         description: "",
-        image: "/images/placeholder.png",
+        image: `${SOMOIM_CDN}/${SOMOIM_GROUP_ID}${event.date}${String(event.time).padStart(4, "0")}s1.png`,
         price: parsePriceNumber(event.fee),
         priceLabel: event.fee,
         instructor: group.an || "강사 미정",

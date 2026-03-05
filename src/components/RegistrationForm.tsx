@@ -13,9 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { createRegistration } from "@/lib/supabase";
-
 import emailjs from "@emailjs/browser";
 
 const formSchema = z.object({
@@ -24,6 +23,7 @@ const formSchema = z.object({
   phone2: z.string(),
   phone3: z.string(),
   classType: z.string(),
+  message: z.string().optional(),
 });
 
 interface RegistrationFormProps {
@@ -49,6 +49,7 @@ export function RegistrationForm({
       phone2: "",
       phone3: "",
       classType: "",
+      message: "",
     },
   });
 
@@ -59,58 +60,31 @@ export function RegistrationForm({
     }
   }, []);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit() {
     setIsSubmitting(true);
 
     try {
-      const phone = `${values.phone1}${values.phone2}${values.phone3}`;
-      const result = await createRegistration({
-        classId,
-        bakingClass: bakingClass.name,
-        name: values.name,
-        email: "",
-        phone: phone,
-      });
+      await emailjs.sendForm(
+        "service_assdg6b",
+        "template_e0baemk",
+        formRef.current as any,
+        { publicKey: "QTOKax_NCpY8EPile" }
+      );
 
-      if (result.success) {
-        toast({
-          title: "신청 완료",
-          description: "클래스 신청이 완료되었습니다! 바로 연락드리겠습니다.",
-          variant: "default",
-        });
-        onSuccess();
-      } else {
-        toast({
-          title: "신청 실패",
-          description: result.error || "잠시 후 다시 시도해주세요",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "신청 완료",
+        description: "클래스 신청이 완료되었습니다! 바로 연락드리겠습니다.",
+        variant: "default",
+      });
+      onSuccess();
     } catch (error) {
       toast({
         title: "신청 실패",
-        description: "예기치 않은 오류가 발생했습니다",
+        description: "잠시 후 다시 시도해주세요",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
-      emailjs
-        .sendForm(
-          "service_assdg6b",
-          "template_e0baemk",
-          formRef.current as any,
-          {
-            publicKey: "QTOKax_NCpY8EPile",
-          }
-        )
-        .then(
-          () => {
-            console.log("SUCCESS!");
-          },
-          (error) => {
-            console.log("FAILED...", error);
-          }
-        );
     }
   }
 
@@ -210,6 +184,24 @@ export function RegistrationForm({
               />
             </div>
           </div>
+
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>기타 요청사항</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="요청사항이 있으시면 입력해주세요"
+                    className="resize-none"
+                    rows={3}
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
           <div className="pt-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>

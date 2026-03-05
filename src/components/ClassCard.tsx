@@ -33,22 +33,6 @@ export function ClassCard({ bakingClass, onClick }: ClassCardProps) {
           alt={bakingClass.title}
           className="object-cover w-full h-full transition-transform duration-500 hover:scale-105 rounded-xl"
         />
-        {/* 초급 중급 밷지 */}
-        {/* <div className="absolute top-3 right-3">
-          <Badge
-            variant="secondary"
-            className={cn(
-              "font-medium whitespace-nowrap",
-              bakingClass.level === "Beginner" &&
-                "bg-emerald-100 text-emerald-800",
-              bakingClass.level === "Intermediate" &&
-                "bg-amber-100 text-amber-800",
-              bakingClass.level === "Advanced" && "bg-rose-100 text-rose-800"
-            )}
-          >
-            {levelInKorean}
-          </Badge>
-        </div> */}
       </div>
 
       <CardContent className="flex flex-col w-full pl-3 pr-0 py-1">

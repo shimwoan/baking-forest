@@ -63,7 +63,6 @@ export function ClassDetailsModal({
               {levelInKorean}
             </Badge>
           </div>
-          <p className="font-medium text-xl">{bakingClass.name}</p>
         </SheetHeader>
 
         <RegistrationForm
